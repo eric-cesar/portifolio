@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird game</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <style>
+        body {
+            background-color: rgb(97, 97, 97);
+            overflow: hidden;
+            margin-top: 0px;
+            margin-left: 0px;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        class NeuralNetwork {
+            constructor(inputNodes, hiddenNodes, outputNodes) {
+                this.inputNodes = inputNodes
+                this.hiddenNodes = hiddenNodes
+                this.outputNodes = outputNodes
+
+                tf.setBackend("cpu");
+                this.model = this.createModel()
+            }
+
+            createModel() {
+                const model = tf.sequential()
+
+                const hidden = tf.layers.dense({
+                    units: this.hiddenNodes,
+                    inputDim: this.inputNodes,
+                    activation: "sigmoid"
+                })
+
+                const output = tf.layers.dense({
+                    units: this.outputNodes,
+                    activation: "sigmoid"
+                })
+
+                model.add(hidden)
+                model.add(output)
+
+                model.compile({
+                    loss: "binaryCrossentropy",
+                    optimizer: "adam"
+                })
+
+                return model
+            }
+
+            async train(input, target, epochs, size) {
+                input = tf.tensor2d(input)
+                target = tf.tensor2d(target)
+                for (let i = 0; i < size; i++) {
+                    const response = await this.model.fit(input, target, { epochs: epochs, shuffle: true })
+                    console.log(response.history.loss[0])
+                }
+            }
+
+            predict(input) {
+                return this.model.predict(input)
+            }
+
+            copy() {
+                const clonedModel = this.createModel()
+                const weights = this.model.getWeights()
+                const weightsCopies = []
+                for (let i = 0; i < weights.length; i++) {
+                    weightsCopies[i] = weights[i].clone()
+                }
+                clonedModel.setWeights(weightsCopies)
+                const copy = new NeuralNetwork(this.inputNodes, this.hiddenNodes, this.outputNodes)
+                copy.model = clonedModel
+                return copy
+            }
+
+            mutate(rate) {
+                const weights = this.model.getWeights()
+                const mutatedWeights = []
+                for (let i = 0; i < weights.length; i++) {
+                    let tensor = weights[i]
+                    let shape = weights[i].shape
+                    let values = tensor.dataSync().slice()
+                    for (let j = 0; j < values.length; j++) {
+                        if (Math.random() < rate) {
+                            let w = values[j]
+                            values[j] = w + Math.random() * 2 - 1
+                        }
+                    }
+                    let newTensor = tf.tensor(values, shape)
+                    mutatedWeights[i] = newTensor
+                }
+                this.model.setWeights(mutatedWeights)
+            }
+        }
+    </script>
+    <script>
+        class Pipe {
+            constructor(largura, velocidadeX, buracoY, alturaBuraco, pipeX) {
+                this.largura = largura
+                this.velocidadeX = velocidadeX
+                this.buracoY = buracoY
+                this.alturaBuraco = alturaBuraco
+                this.pipeX = pipeX
+                this.proximo = true
+            }
+
+            update() {
+                this.pipeX += this.velocidadeX
+            }
+
+            colide(x, y, radius) {
+                if (x + radius > this.pipeX && x - radius < this.pipeX + this.largura) {
+                    if (y - radius < this.buracoY || y + radius > this.buracoY + this.alturaBuraco) {
+                        return true
+                    }
+                }
+                return false
+            }
+        }
+    </script>
+    <script>
+        class Bird {
+            constructor(x, y, gravity) {
+                this.x = x
+                this.y = y
+                this.gravity = gravity
+                this.dy = -5
+                this.died = false
+                this.score = 0
+
+                this.brain = new NeuralNetwork(4, 4, 1)
+            }
+
+            think(pipes) {
+                let proxPipe
+                for (let i = 0; i < pipes.length; i++) {
+                    if (pipes[i].proximo) {
+                        proxPipe = pipes[i]
+                        break
+                    }
+                }
+
+                let inputs = []
+                inputs[0] = this.y / height
+                inputs[1] = proxPipe.buracoY / height
+                inputs[2] = (proxPipe.buracoY + proxPipe.alturaBuraco) / height
+                inputs[3] = proxPipe.pipeX / width
+
+                inputs = tf.tensor2d([inputs])
+
+                let output = this.brain.predict(inputs).arraySync()[0][0];
+
+                if (output > 0.5) this.jump()
+            }
+
+            update() {
+                this.dy += this.gravity
+                this.y += this.dy
+            }
+
+            jump() {
+                this.dy = -birdJump
+            }
+        }
+    </script>
+    <script>
+        const width = innerWidth
+        const height = innerHeight
+        const pipeLargura = width / 12
+        const larguraBuraco = height / 4
+        let velocidadePipe = 3
+        const birdX = width / 3
+        const birdY = height / 2
+        const gravity = 0.3
+        const numBirds = 250
+        const birdRadius = larguraBuraco / 10
+        const birdJump = height / 100
+
+        let pipes = [new Pipe(pipeLargura, -velocidadePipe, Math.random() * (height - larguraBuraco), larguraBuraco, width)]
+        let birds = []
+        //const bird = new Bird(birdX, birdY, gravity)
+        let scores = new Array(numBirds)
+        let bestScore = 0
+        let vivos = numBirds
+        let geracao = 1
+
+        for (let i = 0; i < numBirds; i++) {
+            birds.push(new Bird(birdX, birdY, gravity))
+        }
+
+        function drawPipe(pipe) {
+            fill(0, 255, 0)
+            stroke(0)
+            strokeWeight(2.5)
+            rect(pipe.pipeX, 0, pipe.largura, pipe.buracoY)
+            rect(pipe.pipeX, pipe.buracoY + pipe.alturaBuraco, pipe.largura, height)
+            pipe.update()
+        }
+
+        function drawBird(bird) {
+            fill(255, 120, 0)
+            stroke(0)
+            strokeWeight(2.5)
+            circle(bird.x, bird.y, 2 * birdRadius)
+            if (bird.y > height || bird.y < 0) {
+                bird.died = true
+            }
+            bird.update()
+        }
+
+        // function handleKeyPress(event) {
+        //     if (event.keyCode === 32 && bird.y >= 0) {
+        //         bird.jump()
+        //     }
+        // }
+
+        // document.addEventListener('keydown', handleKeyPress);
+
+        function setup() {
+            const canvas = createCanvas(width, height)
+        }
+
+        function draw() {
+            tf.tidy(() => {
+                if (pipes[0].pipeX + pipes[0].largura <= 0) {
+                    pipes.shift()
+                }
+                clear()
+                background(0, 80, 255)
+
+                for (let i = 0; i < birds.length; i++) {
+                    drawBird(birds[i])
+                    birds[i].think(pipes)
+                    if (birds[i].died) {
+                        scores[i] = birds[i]
+                        birds.splice(i, 1)
+                        vivos--
+                    }
+                }
+
+                for (const pipe of pipes) {
+                    if (intervaloDiscreto(pipe.pipeX + pipe.largura, birdX, velocidadePipe)) {
+                        pipe.proximo = false
+                        bestScore++
+                    }
+                    drawPipe(pipe)
+                    for (const bird of birds) {
+                        if (intervaloDiscreto(pipe.pipeX + pipe.largura, birdX, velocidadePipe) && !bird.died) {
+                            bird.score++
+                        }
+                        if (pipe.colide(bird.x, bird.y, birdRadius)) {
+                            bird.died = true
+                        }
+                    }
+                    if (intervaloDiscreto(pipe.pipeX + pipe.largura, width - width / 4, velocidadePipe)) {
+                        pipes.push(new Pipe(pipeLargura, -velocidadePipe, Math.random() * (height - larguraBuraco), larguraBuraco, width))
+                    }
+                }
+
+                fill(255, 0, 0)
+                textSize(30)
+                text(`Vivos: ${vivos}`, 50, 50)
+                text(`Geração: ${geracao}`, 50, 100)
+                text(`Score: ${bestScore}`, 50, 150)
+
+                if (vivos === 0) restart()
+            })
+        }
+
+        function nextGeneration() {
+            let birds = []
+
+            for (let i = 0; i < numBirds; i++) {
+                const bird = new Bird(birdX, birdY, gravity)
+                const bestModel = scores[0].brain.copy()
+                if (i) {
+                    bestModel.mutate(0.1)
+                    bird.brain = bestModel
+                    birds.push(bird)
+                } else {
+                    bird.brain = bestModel
+                    birds.push(bird)
+                }
+            }
+
+            return birds
+        }
+
+        function intervaloDiscreto(x, num, intervalo) {
+            return x >= num && x < num + intervalo
+        }
+
+        function restart() {
+            pipes = [new Pipe(pipeLargura, -velocidadePipe, Math.random() * (height - larguraBuraco), larguraBuraco, width)]
+            birds = nextGeneration()
+            vivos = numBirds
+            geracao++
+            bestScore = 0
+
+            scores = new Array(numBirds).fill(0)
+        }
+    </script>
+</body>
+
+</html>

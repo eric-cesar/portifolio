@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ligue 4</title>
+    <style>
+        .blue,
+        .yellow {
+            width: 80px;
+            height: 80px;
+            background-color: #3498db;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .blue {
+            background-color: blue;
+        }
+
+        .yellow {
+            background-color: yellow;
+        }
+
+        .empty-cell {
+            width: 80px;
+            height: 80px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 50%;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to bottom, #30005e, #00087c);
+            overflow: hidden;
+            /* Impede a rolagem vertical */
+        }
+
+
+        table {
+            border-collapse: separate;
+            border-spacing: 5px;
+        }
+
+        button#reiniciar {
+            padding: 10px 20px;
+            background-color: #7e0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 50px;
+            margin-top: 100px;
+            background: linear-gradient(to bottom, #2980b9, #29b954);
+        }
+
+        .pontuacao,
+        .reiniciar-div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pontuacao table {
+            font-family: Arial, sans-serif;
+            font-size: 24px;
+            border-collapse: collapse;
+        }
+
+        .pontuacao table tr {
+            border: 2px solid #c1e6ff;
+        }
+
+        .pontuacao table td {
+            padding: 10px 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .pontuacao table td:first-child {
+            font-weight: bold;
+            background-color: #00365a;
+            color: white;
+        }
+
+        @media (max-width: 767px) {
+
+            body,
+            .container {
+                width: 100%;
+                padding: 0;
+                margin-top: 0px;
+            }
+
+            .blue,
+            .yellow,
+            .empty-cell {
+                width: 10vw;
+                height: 10vw;
+            }
+
+            .pontuacao table {
+                font-size: 26px;
+            }
+
+            button#reiniciar {
+                padding: 5px 10px;
+                font-size: 20px;
+            }
+
+            .reiniciar-div {
+                margin: 10px;
+            }
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            font-family: 'Your-Font', sans-serif;
+            font-size: 36px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #robo {
+            background-color: #29b954;
+            /* Cor de fundo verde */
+            color: white;
+            /* Cor do texto branco */
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-bottom: 20px;
+        }
+
+        #robo:hover {
+            background-color: #3ecf77;
+            /* Cor de fundo alterada quando o mouse está sobre o botão */
+        }
+
+        #robo:active {
+            background-color: #00eeff;
+            /* Cor de fundo alterada quando o botão está ativo (clicado) */
+        }
+
+        h2 {
+            background-color: #ff6600;
+            /* Cor de fundo laranja (você pode ajustar a cor a seu gosto) */
+            color: white;
+            /* Cor do texto branco */
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 20px;
+            text-align: center;
+            /* Alinhar o texto ao centro */
+            margin-top: 0px;
+            /* Adicionar margem superior para separação */
+        }
+
+        /* ... (your existing CSS code) ... */
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 50px;
+            margin-top: 100px;
+            background: linear-gradient(to bottom, #2980b9, #29b954);
+        }
+
+        .score-and-buttons {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            /* Ensures it takes the full width of the container */
+            margin-bottom: 20px;
+            /* Separation between the table and buttons */
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Jogo ligue 4!</h1>
+    <div class="container">
+        <div class="score-and-buttons">
+            <div class="pontuacao">
+                <table>
+                    <tr>
+                        <td>Azul:</td>
+                        <td id="pontuacaoAzul">0</td>
+                    </tr>
+                    <tr>
+                        <td>Amarela:</td>
+                        <td id="pontuacaoAmarela">0</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="reiniciar-div">
+                <button id="reiniciar" onclick="reiniciar()">Reiniciar</button>
+                <button id="robo" onclick="automatico()">Nº Jogadores</button>
+                <h2 id="auto">Automático</h2>
+            </div>
+        </div>
+
+        <table>
+            <tbody id="board">
+            </tbody>
+        </table>
+    </div>
+    <script lang="JavaScript">
+        class Peca {
+            #cor // 1 = azul -1 = amarela
+
+            constructor(cor) {
+                this.#cor = cor
+            }
+
+            get cor() {
+                return this.#cor
+            }
+
+        }
+    </script>
+    <script lang="JavaScript">
+        class Tabuleiro {
+            #LINHAS = 6
+            #COLUNAS = 7
+            #matriz = []
+
+            constructor() {
+                this.iniciarMatriz()
+            }
+
+            iniciarMatriz() {
+                for (let x = 0; x < this.#COLUNAS; x++) {
+                    this.#matriz[x] = []
+                    for (let y = 0; y < this.#LINHAS; y++) {
+                        this.#matriz[x][y] = null
+                    }
+                }
+            }
+
+            tabuleiroCheio() {
+                for (let i = 0; i < this.#COLUNAS; i++) {
+                    for (let j = 0; j < this.#LINHAS; j++) {
+                        if (this.#matriz[i][j] === null) {
+                            return false
+                        }
+                    }
+                }
+                return true
+            }
+
+            #addPeca(x, y, cor) {
+                this.#matriz[x][y] = new Peca(cor)
+            }
+
+            getProximaLinhaVazia(col) {
+                for (let i = 0; i < this.#LINHAS; i++) {
+                    if (this.#matriz[col][i] === null) {
+                        return i
+                    }
+                }
+                return -1
+            }
+
+            pecasNaColuna(x) {
+                let quantidadeDePecas = 0
+                for (let i = 0; i < this.#LINHAS; i++) {
+                    if (this.#matriz[x][i] !== null) {
+                        quantidadeDePecas++
+                    }
+                }
+                return quantidadeDePecas
+            }
+
+            colunaCheia(x) {
+                if (this.#matriz[x][this.#LINHAS - 1] !== null) {
+                    return true
+                }
+                return false
+            }
+
+            #colunaVazia(x) {
+                if (this.#matriz[x][0] === null) {
+                    return true
+                }
+                return false
+            }
+
+            colocarPeca(x, cor) {
+                //Se a coluna não está cheia
+                if (!this.colunaCheia(x)) {
+                    //Coluna vazia
+                    if (this.#colunaVazia(x)) {
+                        this.#addPeca(x, 0, cor)
+                        return [x, 0]
+                    } else {
+                        //Coluna contem ao menos 1 peça porem não está cheia
+                        for (let i = this.#LINHAS - 1; i >= 0; i--) {
+                            if (this.#matriz[x][i] !== null) {
+                                this.#addPeca(x, i + 1, cor)
+                                return [x, i + 1]
+                            }
+                        }
+                    }
+                }
+                return false
+            }
+
+            exibirTabuleiro() {
+                for (let y = this.#LINHAS - 1; y >= 0; y--) {
+                    let linha = '';
+                    for (let x = 0; x < this.#COLUNAS; x++) {
+                        const peca = this.#matriz[x][y];
+                        if (peca === null) {
+                            linha += ' - ';
+                        } else {
+                            linha += ` ${peca.cor} `;
+                        }
+                    }
+                    console.log(linha);
+                }
+            }
+
+            getPosicao(x, y) {
+                if (x >= 0 && x < this.#matriz.length && y >= 0 && y < this.#matriz[x].length) {
+                    return this.#matriz[x][y];
+                } else {
+                    //Retornar undefined se estiver fora do limite da matriz
+                    return undefined;
+                }
+            }
+
+            get matriz() {
+                return this.#matriz
+            }
+
+            get invertida() {
+                const novaMatriz = []
+                for (let i = 0; i < this.#LINHAS; i++) {
+                    novaMatriz[i] = []
+                    for (let j = 0; j < this.#COLUNAS; j++) {
+                        novaMatriz[i][j] = this.#matriz[j][i]
+                    }
+                }
+                return novaMatriz
+            }
+
+            setMatriz(x, y, valor) {
+                this.#matriz[x][y] = valor
+            }
+        }
+    </script>
+    <script lang="JavaScript">
+        class Jogo {
+            #lances = []
+            #tabuleiro = new Tabuleiro()
+            #corAJogar = 1 //1 = azul, -1 = amarelo
+
+            #alternarCor() {
+                if (this.#corAJogar === 1) {
+                    this.#corAJogar = -1
+                } else {
+                    this.#corAJogar = 1
+                }
+            }
+
+            colocarPeca(x) {
+                if (this.fimJogo() !== false) {
+                    return false
+                }
+                const peca = this.#tabuleiro.colocarPeca(x, this.#corAJogar);
+                if (!peca) {
+                    return false;
+                }
+                this.#lances.push(peca);
+                this.#alternarCor();
+                return true;
+            }
+
+            desfazerUltimaJogada() {
+                if (this.#lances.length === 0) {
+                    return false
+                } else {
+                    const [x, y] = this.#lances[this.#lances.length - 1]
+                    this.#tabuleiro.setMatriz(x, y, null)
+                    this.#alternarCor()
+                    this.#lances.pop()
+                    return true
+                }
+            }
+
+            verificarSentido(x, y, sentido, cor) {
+                let mao = 0;
+                let contraMao = 0;
+                const sentidos = {
+                    horizontal: [[1, 0], [-1, 0]],
+                    vertical: [[0, 1], [0, -1]],
+                    direitaCima: [[1, 1], [-1, -1]],
+                    esquerdaCima: [[-1, 1], [1, -1]]
+                };
+
+                for (let i = 0; i < 2; i++) {
+                    const [dx, dy] = sentidos[sentido][i];
+                    for (let j = 0; j < 4; j++) {
+                        const posicao = this.#tabuleiro.getPosicao(x + j * dx, y + j * dy);
+
+                        if (posicao === undefined || posicao === null || posicao.cor !== cor) {
+                            break;
+                        } else if (posicao.cor === cor) {
+                            if (i === 0) mao++;
+                            else contraMao++;
+                        }
+                    }
+                }
+
+                if (mao + contraMao - 1 >= 4) {
+                    return true;
+                }
+                return false;
+            }
+
+            verificarDirecao(x, y, direcao, cor, numLinha) {
+                let validar = 0;
+                let proxima;
+                for (let i = 0; i < numLinha; i++) {
+                    let posicao;
+                    if (direcao === "cima") {
+                        posicao = this.#tabuleiro.getPosicao(x, y + i);
+                        proxima = x
+                    } else if (direcao === "baixo") {
+                        posicao = this.#tabuleiro.getPosicao(x, y - i);
+                        proxima = x
+                    } else if (direcao === "direita") {
+                        posicao = this.#tabuleiro.getPosicao(x + i, y);
+                        proxima = x + 3
+                    } else if (direcao === "esquerda") {
+                        posicao = this.#tabuleiro.getPosicao(x - i, y);
+                        proxima = x - 3
+                    } else if (direcao === "direitaCima") {
+                        posicao = this.#tabuleiro.getPosicao(x + i, y + i);
+                        proxima = x + 3
+                    } else if (direcao === "direitaBaixo") {
+                        posicao = this.#tabuleiro.getPosicao(x + i, y - i);
+                        proxima = x + 3
+                    } else if (direcao === "esquerdaCima") {
+                        posicao = this.#tabuleiro.getPosicao(x - i, y + i);
+                        proxima = x - 3
+                    } else if (direcao === "esquerdaBaixo") {
+                        posicao = this.#tabuleiro.getPosicao(x - i, y - i);
+                        proxima = x - 3
+                    }
+                    if (posicao === undefined || posicao === null || posicao.cor !== cor) {
+                        return false;
+                    } else if (posicao.cor === cor) {
+                        validar++;
+                    }
+                }
+                if (validar === numLinha) {
+                    return [true, proxima];
+                }
+                return false
+            }
+
+            reiniciar() {
+                this.#tabuleiro = new Tabuleiro()
+                this.#lances = []
+                this.#corAJogar = 1
+                this.exibirHtml()
+                console.info("Jogo reiniciado")
+            }
+
+            fimJogo() {
+                if (this.#lances.length === 0) {
+                    return false;
+                }
+
+                const [ultimoX, ultimoY] = this.#lances[this.#lances.length - 1];
+                const cor = this.#tabuleiro.getPosicao(ultimoX, ultimoY).cor;
+
+                const sentidos = ["horizontal", "vertical", "direitaCima", "esquerdaCima"];
+
+                for (const sentido of sentidos) {
+                    if (this.verificarSentido(ultimoX, ultimoY, sentido, cor)) {
+                        return cor;
+                    }
+                }
+                return false;
+            }
+
+            evaluate() {
+                let score = 0;
+
+                const PLAYER = 1
+                const AI = -1
+
+                // Pontuação para as peças do jogador
+                if (this.fimJogo() === 1) {
+                    score = -1000;
+                }
+
+                // Pontuação para as peças do AI
+                if (this.fimJogo() === -1) {
+                    score = 1000;
+                }
+
+                // Pontuação para peças consecutivas do AI
+                for (let row = 0; row < 6; row++) {
+                    for (let col = 0; col <= 7 - 4; col++) {
+                        const slice = this.#tabuleiro.invertida[row].slice(col, col + 4);
+                        const aiCount = slice.filter((cell) => cell !== null && cell.cor === AI).length;
+                        const playerCount = slice.filter((cell) => cell !== null && cell.cor === PLAYER).length;
+
+                        if (aiCount === 3 && playerCount === 0) {
+                            score += 100;
+                        }
+
+                        if (aiCount === 2 && playerCount === 0) {
+                            score += 10;
+                        }
+
+                        if (aiCount === 1 && playerCount === 0) {
+                            score += 1;
+                        }
+
+                        if (aiCount === 0 && playerCount === 3) {
+                            score -= 100;
+                        }
+
+                        if (aiCount === 0 && playerCount === 2) {
+                            score -= 10;
+                        }
+
+                        if (aiCount === 0 && playerCount === 1) {
+                            score -= 1;
+                        }
+                    }
+                }
+                return score;
+            }
+
+            checkWin(player) {
+                for (let ultimoX = 0; ultimoX < 7; ultimoX++) {
+                    for (let ultimoY = 0; ultimoY < 6; ultimoY++) {
+                        const sentidos = ["horizontal", "vertical", "direitaCima", "esquerdaCima"];
+
+                        for (const sentido of sentidos) {
+                            if (this.verificarSentido(ultimoX, ultimoY, sentido, player)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false
+            }
+
+            nomeCor(cor) {
+                if (cor === 1) {
+                    return "Azul"
+                } else if (cor === -1) {
+                    return "Amarela"
+                }
+            }
+
+            exibir() {
+                this.#tabuleiro.exibirTabuleiro()
+            }
+
+            get lances() {
+                return this.#lances
+            }
+
+            get tabuleiro() {
+                return this.#tabuleiro
+            }
+
+            exibirHtml() {
+                const board = document.getElementById("board");
+                board.innerHTML = "";
+
+                for (let i = 5; i >= 0; i--) {
+                    const row = document.createElement("tr");
+                    for (let j = 0; j < 7; j++) {
+                        const cell = document.createElement("td");
+                        const posicao = this.#tabuleiro.getPosicao(j, i); // Inverti as coordenadas
+
+                        if (posicao !== null) {
+                            const peca = posicao.cor;
+
+                            // Crie um elemento div para representar a peça
+                            const piece = document.createElement("div");
+                            piece.classList.add("piece");
+
+                            if (peca === 1) {
+                                // Adicione a classe "blue" para círculos azuis
+                                piece.classList.add("blue");
+                            } else if (peca === -1) {
+                                // Adicione a classe "yellow" para círculos amarelos
+                                piece.classList.add("yellow");
+                            }
+
+                            cell.appendChild(piece);
+                        } else {
+                            cell.textContent = "";
+                            cell.classList.add("empty-cell");
+                        }
+                        row.appendChild(cell);
+                        cell.setAttribute("id", `cell-${j}-${i}`);
+                    }
+                    board.appendChild(row);
+                }
+            }
+
+            melhorJogadaAlfaBeta(depth, jogador, alpha, beta) {
+                if (depth === 0 || this.fimJogo() || this.#tabuleiro.tabuleiroCheio()) {
+                    return {
+                        score: this.evaluate(),
+                        coluna: null,
+                    };
+                }
+
+                let melhorJogada = { score: jogador === 1 ? -Infinity : Infinity, coluna: null };
+
+                for (let col = 0; col < 7; col++) {
+                    if (!this.#tabuleiro.colunaCheia(col)) {
+                        const linha = this.#tabuleiro.getProximaLinhaVazia(col);
+                        this.colocarPeca(col);
+                        const pontuacao = this.melhorJogadaAlfaBeta(depth - 1, -jogador, alpha, beta).score;
+                        this.desfazerUltimaJogada();
+
+                        if (jogador === 1) {
+                            if (pontuacao > melhorJogada.score) {
+                                melhorJogada.score = pontuacao;
+                                melhorJogada.coluna = col;
+                            }
+                            alpha = Math.max(alpha, pontuacao);
+                        } else {
+                            if (pontuacao < melhorJogada.score) {
+                                melhorJogada.score = pontuacao;
+                                melhorJogada.coluna = col;
+                            }
+                            beta = Math.min(beta, pontuacao);
+                        }
+
+                        if (beta <= alpha) {
+                            break; // Podar o restante do loop
+                        }
+                    }
+                }
+
+                return melhorJogada;
+            }
+        }
+
+        const jogo = new Jogo()
+
+        jogo.exibirHtml()
+
+        let auto = true
+
+        //atualizar o jogo se uma coluna for clicada
+        document.getElementById("board").addEventListener("click", (event) => {
+            if (event.target.tagName === "TD") {
+                const cell = event.target;
+                const cellId = cell.getAttribute("id");
+                const column = parseInt(cellId.split("-")[1]);
+                jogo.colocarPeca(column);
+                jogo.exibirHtml();
+                if (auto) {
+                    setTimeout(function () {
+                        //fazerLanceAuto()
+                        lanceMinimax()
+                    }, 500);
+                } else {
+                    const fim = jogo.fimJogo()
+                    if (fim) {
+                        atualizarPlacar(fim)
+                        setTimeout(function () {
+                            let corVencedora = jogo.nomeCor(fim)
+                            if (confirm(`${corVencedora} venceu! Reiniciar jogo?`)) {
+                                jogo.reiniciar()
+                            }
+                        }, 100);
+                        return
+                    }
+                }
+            }
+        });
+
+        let amarelaPontos = 0
+        let azulPontos = 0
+
+        function atualizarPlacar(fim) {
+            const pontuacaoAmarela = document.getElementById("pontuacaoAmarela")
+            const pontuacaoAzul = document.getElementById("pontuacaoAzul")
+
+            if (jogo.nomeCor(fim) === "Azul") {
+                azulPontos++
+                pontuacaoAzul.innerHTML = azulPontos
+            } else if (jogo.nomeCor(fim) === "Amarela") {
+                amarelaPontos++
+                pontuacaoAmarela.innerHTML = amarelaPontos
+            }
+            return
+        }
+
+        function reiniciar() {
+            if (confirm("Você deseja reiniciar?")) {
+                jogo.reiniciar()
+            }
+        }
+    </script>
+    <script lang="JavaScript">
+        class Temakinha {
+            #jogo
+            constructor(jogo) {
+                this.#jogo = jogo
+            }
+
+            falta1() {
+                if (this.#jogo.lances.length === 0) {
+                    return false;
+                }
+
+                const [ultimoX, ultimoY] = this.#jogo.lances[this.#jogo.lances.length - 1];
+                const cor = this.#jogo.tabuleiro.getPosicao(ultimoX, ultimoY).cor;
+
+                const direcoes = ["direita", "esquerda", "cima", "baixo", "direitaCima", "direitaBaixo", "esquerdaCima", "esquerdaBaixo"];
+
+                for (const direcao of direcoes) {
+                    const validar = this.#jogo.verificarDirecao(ultimoX, ultimoY, direcao, cor, 3)
+                    if (validar[0]) {
+                        return [cor, validar[1]];
+                    }
+                }
+                return false;
+            }
+
+            autoLance() {
+                const avaliar = this.falta1()
+                if (avaliar === false) {
+                    return Math.round(generateRandomNumber())
+                } else {
+                    return avaliar[1]
+                }
+            }
+        }
+
+        const temakinha = new Temakinha(jogo)
+
+        function fazerLanceAuto() {
+            let coluna = temakinha.autoLance()
+            while (jogo.tabuleiro.colunaCheia(coluna) === true && jogo.fimJogo() === false) {
+                coluna = Math.round(generateRandomNumber())
+            }
+            jogo.colocarPeca(coluna)
+            jogo.exibirHtml()
+            const fim = jogo.fimJogo()
+            if (fim !== false) {
+                atualizarPlacar(fim)
+                setTimeout(function () {
+                    let corVencedora = jogo.nomeCor(fim)
+                    if (confirm(`${corVencedora} venceu! Reiniciar jogo?`)) {
+                        jogo.reiniciar()
+                    }
+                }, 100);
+                return
+            }
+            return coluna
+        }
+
+        function automatico() {
+            const player = document.getElementById("auto")
+            if (auto) {
+                player.innerHTML = "2 Players"
+            } else {
+                player.innerHTML = "Automático"
+            }
+
+            auto = !auto
+        }
+
+        function lanceMinimax() {
+            const coluna = jogo.melhorJogadaAlfaBeta(8, 1, -Infinity, Infinity).coluna
+
+            jogo.colocarPeca(coluna)
+            jogo.exibirHtml()
+            const fim = jogo.fimJogo()
+
+            if (fim !== false) {
+                atualizarPlacar(fim)
+                setTimeout(function () {
+                    let corVencedora = jogo.nomeCor(fim)
+                    if (confirm(`${corVencedora} venceu! Reiniciar jogo?`)) {
+                        jogo.reiniciar()
+                    }
+                }, 100);
+                return
+            }
+            return coluna
+        }
+    </script>
+    <script lang="JavaScript">
+        function customNormalDistribution(x) {
+            const mu = 3; // Média
+            const sigma = 1.0; // Desvio padrão (ajuste conforme necessário)
+
+            // Função de densidade de probabilidade da distribuição normal
+            const pdf = 1 / (sigma * Math.sqrt(2 * Math.PI)) * Math.exp(-((x - mu) ** 2) / (2 * sigma ** 2));
+
+            return pdf;
+        }
+
+        // Função para calcular a probabilidade cumulativa até um determinado ponto (CDF)
+        function cumulativeProbability(x) {
+            let step = 0.01; // Passo para calcular a integral
+            let totalProbability = 0;
+            for (let i = -1; i <= x; i += step) {
+                totalProbability += customNormalDistribution(i) * step;
+            }
+            return totalProbability;
+        }
+
+        // Gerador de número aleatório com base na probabilidade utilizando a inversão do CDF
+        function generateRandomNumber() {
+            const targetProbability = Math.random(); // Probabilidade aleatória entre 0 e 1
+            let x = -1;
+            let cumulativeProb = 0;
+
+            // Encontra o valor de x onde a probabilidade acumulada é igual ou maior que a aleatoriedade, excluindo o valor especificado
+            while (cumulativeProb < targetProbability) {
+                x += 0.001; // Incremento para buscar um valor onde a probabilidade acumulada seja igual ou maior que a aleatoriedade
+                cumulativeProb = cumulativeProbability(x);
+            }
+
+            if (x < 0) {
+                return 0
+            } else if (x > 6) {
+                return 6
+            }
+            return x;
+        }
+    </script>
+</body>
+
+</html>

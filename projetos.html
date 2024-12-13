@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projetos de Eric Gonçalves Albuquerque</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            background: linear-gradient(to right, #00bcd4, #009688, #00796b);
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        .project {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #777;
+        }
+
+        a {
+            color: #009688;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Meus Projetos</h1>
+
+        <div class="project">
+            <h2>Simulação 3D de Física para Jogos</h2>
+            <p>Desenvolvimento de uma simulação gravitacional interativa em 3D, implementada em JavaScript com o uso de <strong>p5.js</strong> e <strong>WebGL</strong>. A simulação recria cenários complexos de interação entre partículas sujeitas a forças gravitacionais, proporcionando visualizações dinâmicas e realistas.</p>
+            <p>Para otimizar o desempenho em sistemas com milhares de partículas, o projeto emprega o algoritmo de <strong>Octree</strong>, em conjunto com a aproximação de <strong>Barnes-Hut</strong>, reduzindo significativamente o número de cálculos necessários para determinar as forças gravitacionais. Essa abordagem permite um equilíbrio entre precisão e eficiência, essencial para simulações em tempo real.</p>
+            <p>Além disso, a aplicação oferece recursos visuais interativos, como zoom, rotação e ajustes de parâmetros físicos, permitindo explorar os efeitos da gravidade em diferentes condições. Este projeto destaca-se como uma poderosa ferramenta educacional e de experimentação para simulações de física aplicada.</p>
+            <p><a href="gravity.html" target="_blank" style="color: #009688; text-decoration: none; font-weight: bold;">Explorar a Simulação Gravidade 3D</a></p>
+        </div>        
+
+        <div class="project">
+            <h2>Flappy Bird AI</h2>
+            <p>Criação de uma inteligência artificial para jogar o famoso jogo <em>Flappy Bird</em>, utilizando redes neurais e algoritmos genéticos. O projeto emprega uma abordagem inovadora onde o algoritmo genético é responsável por evoluir os pesos da rede neural ao longo de várias gerações. Cada indivíduo (rede neural) é avaliado com base no desempenho dentro do ambiente do jogo, recebendo pontuações proporcionais à distância percorrida e à quantidade de obstáculos superados.</p>
+            <p>As melhores redes são selecionadas para reprodução, combinando e mutando os pesos para gerar uma nova população. Esse processo iterativo permite que a IA melhore progressivamente suas habilidades sem supervisão direta. A simulação do ambiente foi implementada em <strong>p5.js</strong>, enquanto os cálculos e operações do algoritmo genético foram otimizados com bibliotecas de JavaScript para garantir desempenho.</p>
+            <p><a href="flappyBirdAI.html" target="_blank" style="color: #009688; text-decoration: none; font-weight: bold;">Mais detalhes sobre o Flappy Bird AI</a></p>
+        </div>
+
+        <div class="project">
+            <h2>Ligue 4</h2>
+            <p>Desenvolvimento de uma versão interativa do clássico jogo <strong>Ligue 4</strong>, totalmente implementada utilizando <strong>HTML</strong>, <strong>CSS</strong> e <strong>JavaScript</strong>. O projeto combina uma interface intuitiva e responsiva com uma inteligência artificial que desafia os jogadores a cada partida.</p>
+            <p>A IA utiliza o algoritmo <strong>Minimax</strong>, uma abordagem de busca baseada em teoria dos jogos, para calcular os melhores movimentos em tempo real. Com a ajuda de técnicas como poda alfa-beta, o desempenho do algoritmo é otimizado, permitindo decisões rápidas e eficientes, mesmo em estados avançados do jogo.</p>
+            <p>O jogo oferece uma experiência envolvente para jogadores de todos os níveis, desde iniciantes até os mais experientes. Recursos adicionais incluem a visualização do tabuleiro em diferentes resoluções e ajustes dinâmicos na dificuldade, garantindo diversão e aprendizado.</p>
+            <p><a href="ligue4.html" target="_blank" style="color: #009688; text-decoration: none; font-weight: bold;">Explore o jogo</a></p>
+        </div>        
+
+        <div class="footer">
+            <p>Voltar para o <a href="index.html">Currículo</a></p>
+        </div>
+    </div>
+</body>
+
+</html>
